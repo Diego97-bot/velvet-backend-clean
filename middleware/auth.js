@@ -1,0 +1,29 @@
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/auth");
+
+function auth(req, res, next) {
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res.status(401).json({ error: "Token no proporcionado" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // 🔥 ESTA ES LA CLAVE
+    req.user = { id: decoded.id };
+
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido o expirado" });
+  }
+}
+
+module.exports = auth;
