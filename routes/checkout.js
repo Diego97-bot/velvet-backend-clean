@@ -80,8 +80,8 @@ router.post("/", async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
             line_items,
-            success_url: "http://127.0.0.1:5500/pago-exitoso.html",
-            cancel_url: "http://127.0.0.1:5500/pago-cancelado.html",
+            success_url: "https://velvet-frontend-taupe.vercel.app/pago-exitoso.html",
+            cancel_url: "https://velvet-frontend-taupe.vercel.app/pago-cancelado.html",
             metadata: {
                 usuario_id,
                 tipo,
