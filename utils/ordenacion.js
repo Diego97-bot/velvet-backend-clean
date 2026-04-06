@@ -10,7 +10,7 @@ function pesoExtra(extras) {
     const nombres = extras.map(e => e.nombre);
 
     if (nombres.includes("boost_3dias")) return 3;
-    if (nombres.includes("boost_24h")) return 2;
+    if (nombres.includes("subida_24h")) return 2;
     if (nombres.includes("auto_subida_6h")) return 1;
 
     return 0;
