@@ -32,12 +32,19 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     }
 
     const session = event.data.object;
+
+    console.log("📦 METADATA RECIBIDA:", session.metadata);
+
     const { usuario_id, tipo, ref_id, plan } = session.metadata;
 
     let extras = [];
     try {
         extras = JSON.parse(session.metadata.extras || "[]");
-    } catch {}
+    } catch (e) {
+        console.log("⚠️ No se pudieron parsear extras:", e.message);
+    }
+
+    console.log("📦 EXTRAS PARSEADOS:", extras);
 
     const cantidadPagada = session.amount_total / 100;
     const tabla = tipo === "anuncio" ? "anuncios" : "habitaciones";
@@ -53,11 +60,15 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                 ? "anuncio_extra"
                 : extras[0].nombre;
 
+        console.log("🔍 Buscando micropago:", nombreBuscado);
+
         const { data: microData } = await supabase
             .from("micropagos")
             .select("id")
             .eq("nombre", nombreBuscado)
             .single();
+
+        console.log("📌 Micropago encontrado:", microData);
 
         micropago_id = microData?.id || null;
     }
@@ -66,6 +77,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     // 🟢 CASO ESPECIAL: SOLO anuncios_extra
     // ============================================================
     if (extras.length === 1 && extras[0].nombre === "anuncios_extra" && !plan) {
+        console.log("🟢 Procesando anuncios_extra");
+
         const { data: usuarioData } = await supabase
             .from("usuarios")
             .select("anuncios_extra")
@@ -74,6 +87,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
         let actuales = usuarioData?.anuncios_extra || 0;
         let nuevos = Math.min(actuales + (extras[0].cantidad || 1), 3);
+
+        console.log(`➕ Anuncios extra: ${actuales} → ${nuevos}`);
 
         await supabase
             .from("usuarios")
@@ -101,11 +116,15 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     let planInfo = null;
 
     if (plan) {
+        console.log("🔍 Buscando plan:", plan);
+
         const { data } = await supabase
             .from("planes")
             .select("*")
             .eq("nombre", plan.trim().toLowerCase())
             .single();
+
+        console.log("📌 Plan encontrado:", data);
 
         planInfo = data || null;
     }
@@ -113,6 +132,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     // ============================================================
     // 💾 GUARDAR PAGO
     // ============================================================
+    console.log("💾 Guardando pago...");
+
     await supabase.from("pagos").insert({
         usuario_id,
         anuncio_id: tipo === "anuncio" ? ref_id : null,
@@ -131,6 +152,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     if (planInfo && ref_id) {
         const fechaExpira = new Date(Date.now() + planInfo.duracion_dias * 86400000).toISOString();
 
+        console.log(`🟣 Aplicando plan ${planInfo.nombre} hasta ${fechaExpira}`);
+
         await supabase
             .from(tabla)
             .update({
@@ -147,7 +170,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     const mejorasAInsertar = [];
 
     for (const extra of extras) {
-        if (!extra?.nombre || extra.nombre === "anuncios_extra") continue;
+        console.log("➡️ Procesando extra:", extra.nombre);
 
         const { data: extraInfo } = await supabase
             .from("micropagos")
@@ -155,7 +178,12 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
             .eq("nombre", extra.nombre)
             .single();
 
-        if (!extraInfo) continue;
+        console.log("📌 Extra info:", extraInfo);
+
+        if (!extraInfo) {
+            console.log("❌ Extra no encontrado en BD:", extra.nombre);
+            continue;
+        }
 
         const ahora = new Date();
         const ahoraISO = ahora.toISOString();
@@ -163,6 +191,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
         switch (extraInfo.nombre) {
 
             case "subida_24h":
+                console.log("⚡ Activando subida_24h");
+
                 mejorasAInsertar.push({
                     tipo,
                     ref_id,
@@ -175,7 +205,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                     stripe_session_id: session.id
                 });
 
-                // SUBIR ARRIBA
+                console.log("⬆ Subiendo anuncio arriba");
+
                 await supabase
                     .from(tabla)
                     .update({ fecha_creado: ahoraISO })
@@ -184,6 +215,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                 continue;
 
             case "auto_subida_6h":
+                console.log("🔁 Activando auto_subida_6h");
+
                 mejorasAInsertar.push({
                     tipo,
                     ref_id,
@@ -200,6 +233,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                 continue;
 
             case "boost_3dias":
+                console.log("⚡ Activando boost_3dias");
+
                 mejorasAInsertar.push({
                     tipo,
                     ref_id,
@@ -214,6 +249,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                 continue;
 
             case "verificado":
+                console.log("🟧 Activando verificado");
+
                 await supabase
                     .from(tabla)
                     .update({ verificado: true })
@@ -230,11 +267,17 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                 });
 
                 continue;
+
+            default:
+                console.log("❌ Extra no reconocido en switch:", extraInfo.nombre);
         }
     }
 
     if (mejorasAInsertar.length) {
+        console.log("💾 Insertando mejoras:", mejorasAInsertar);
         await supabase.from("mejoras").insert(mejorasAInsertar);
+    } else {
+        console.log("⚠️ No hay mejoras para insertar");
     }
 
     console.log("✨ FIN WEBHOOK");
