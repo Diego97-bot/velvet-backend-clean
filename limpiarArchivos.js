@@ -23,7 +23,7 @@ async function limpiarArchivosHuérfanos() {
 
     fotosHab?.forEach(f => rutasValidas.add(f.url));
 
-    // Videos anuncios
+    // Videos y audios de anuncios
     const { data: anuncios } = await supabase
         .from("anuncios")
         .select("video_ruta, audio_ruta");
@@ -33,7 +33,7 @@ async function limpiarArchivosHuérfanos() {
         if (a.audio_ruta) rutasValidas.add(a.audio_ruta);
     });
 
-    // Videos habitaciones
+    // Videos y audios de habitaciones
     const { data: habitaciones } = await supabase
         .from("habitaciones")
         .select("video_ruta, audio_ruta");
@@ -57,11 +57,11 @@ async function limpiarArchivosHuérfanos() {
         if (!archivos) continue;
 
         for (const archivo of archivos) {
-            const ruta = `${bucket}/${archivo.name}`;
+            const rutaCompleta = `${bucket}/${archivo.name}`;
 
             // Si NO está en BD → borrar
-            if (![...rutasValidas].some(r => r.includes(archivo.name))) {
-                console.log(`🗑 Borrando archivo huérfano: ${ruta}`);
+            if (!rutasValidas.has(rutaCompleta)) {
+                console.log(`🗑 Borrando archivo huérfano: ${rutaCompleta}`);
 
                 await supabase.storage
                     .from(bucket)
@@ -71,7 +71,8 @@ async function limpiarArchivosHuérfanos() {
     }
 
     console.log("✔ Limpieza de archivos completada");
-        // ===============================
+
+    // ===============================
     // 3. LIMPIAR CARPETAS VACÍAS
     // ===============================
     for (const bucket of buckets) {
@@ -81,28 +82,26 @@ async function limpiarArchivosHuérfanos() {
 
         if (!items) continue;
 
-        // Obtener solo carpetas
-        const carpetas = items.filter(i => i.id && i.name.endsWith("/"));
+        // Detectar carpetas (Supabase marca carpetas con "metadata: null")
+        const carpetas = items.filter(i => i.metadata === null);
 
         for (const carpeta of carpetas) {
             const ruta = carpeta.name;
 
-            // Listar contenido de la carpeta
             const { data: contenido } = await supabase.storage
                 .from(bucket)
                 .list(ruta);
 
-            // Si está vacía → borrar
             if (!contenido || contenido.length === 0) {
                 console.log(`🗑 Eliminando carpeta vacía: ${bucket}/${ruta}`);
 
+                // Supabase solo borra carpetas si se pasa sin "/"
                 await supabase.storage
                     .from(bucket)
-                    .remove([ruta]);
+                    .remove([ruta.replace(/\/$/, "")]);
             }
         }
     }
-
 }
 
 module.exports = limpiarArchivosHuérfanos;

@@ -5,9 +5,9 @@ async function limpiarPlanesExpirados() {
 
     const ahora = new Date().toISOString();
 
-    // ===============================
-    // 1. ANUNCIOS → bajar a FREE si expiró
-    // ===============================
+    // ============================================================
+    // 1. ANUNCIOS → bajar a FREE si expiró el plan
+    // ============================================================
     const { data: anuncios } = await supabase
         .from("anuncios")
         .select("id, plan_expira")
@@ -25,9 +25,9 @@ async function limpiarPlanesExpirados() {
         console.log(`🔄 Anuncio ${anuncio.id} → FREE (plan expirado)`);
     }
 
-    // ===============================
-    // 2. HABITACIONES → bajar a FREE si expiró
-    // ===============================
+    // ============================================================
+    // 2. HABITACIONES → bajar a FREE si expiró el plan
+    // ============================================================
     const { data: habitaciones } = await supabase
         .from("habitaciones")
         .select("id, plan_expira")
@@ -45,9 +45,9 @@ async function limpiarPlanesExpirados() {
         console.log(`🔄 Habitación ${hab.id} → FREE (plan expirado)`);
     }
 
-    // ===============================
+    // ============================================================
     // 3. LIMPIAR EXTRAS EXPIRADOS
-    // ===============================
+    // ============================================================
     const { data: extras } = await supabase
         .from("mejoras")
         .select("id, ref_id, fecha_expira")
@@ -60,6 +60,32 @@ async function limpiarPlanesExpirados() {
             .eq("id", extra.id);
 
         console.log(`🧹 Extra ${extra.id} eliminado (ref_id: ${extra.ref_id})`);
+    }
+
+    // ============================================================
+    // 4. LIMPIAR MEJORAS HUÉRFANAS (anuncio/habitación borrado)
+    // ============================================================
+    const { data: mejoras } = await supabase
+        .from("mejoras")
+        .select("id, tipo, ref_id");
+
+    for (const m of mejoras || []) {
+        const tabla = m.tipo === "anuncio" ? "anuncios" : "habitaciones";
+
+        const { data: existe } = await supabase
+            .from(tabla)
+            .select("id")
+            .eq("id", m.ref_id)
+            .single();
+
+        if (!existe) {
+            await supabase
+                .from("mejoras")
+                .delete()
+                .eq("id", m.id);
+
+            console.log(`🗑 Mejora ${m.id} eliminada (anuncio/hab inexistente)`);
+        }
     }
 
     console.log("✔ Limpieza completada");

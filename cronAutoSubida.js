@@ -8,7 +8,7 @@ async function ejecutarAutoSubidas() {
     const { data: mejoras, error } = await supabase
         .from("mejoras")
         .select("*")
-        .eq("mejora_id", 3);
+        .eq("mejora_id", 103);
 
     if (error) {
         console.error("❌ Error leyendo mejoras:", error);

@@ -7,13 +7,33 @@ function pesoPlan(nombre) {
 }
 
 function pesoExtra(extras) {
-    const nombres = extras.map(e => e.nombre);
+    if (!extras || extras.length === 0) {
+        return { peso: 0, fecha: null };
+    }
 
-    if (nombres.includes("boost_3dias")) return 3;
-    if (nombres.includes("subida_24h")) return 2;
-    if (nombres.includes("auto_subida_6h")) return 1;
+    let mejor = { peso: 0, fecha: null };
 
-    return 0;
+    for (const e of extras) {
+        let peso = 0;
+
+        if (e.nombre === "boost_3dias") peso = 3;
+        if (e.nombre === "subida_24h") peso = 2;
+        if (e.nombre === "auto_subida_6h") peso = 1;
+
+        // Si este extra tiene más peso → gana
+        if (peso > mejor.peso) {
+            mejor = { peso, fecha: e.fecha_inicio };
+        }
+
+        // Si tiene el mismo peso → gana el más reciente
+        if (peso === mejor.peso) {
+            if (e.fecha_inicio && (!mejor.fecha || new Date(e.fecha_inicio) > new Date(mejor.fecha))) {
+                mejor = { peso, fecha: e.fecha_inicio };
+            }
+        }
+    }
+
+    return mejor;
 }
 
 
@@ -27,8 +47,14 @@ function ordenarAnuncios(anuncios) {
         const extraA = pesoExtra(a.extras);
         const extraB = pesoExtra(b.extras);
 
-        if (extraA !== extraB) return extraB - extraA;
+        if (extraA.peso !== extraB.peso) return extraB.peso - extraA.peso;
 
+        // Si tienen el mismo extra → ordenar por fecha de mejora
+        if (extraA.fecha && extraB.fecha) {
+            return new Date(extraB.fecha) - new Date(extraA.fecha);
+        }
+
+        // Si ninguno tiene extras → ordenar por fecha de creación
         return new Date(b.fecha_creado) - new Date(a.fecha_creado);
     });
 }
@@ -43,7 +69,11 @@ function ordenarHabitaciones(habs) {
         const extraA = pesoExtra(a.extras);
         const extraB = pesoExtra(b.extras);
 
-        if (extraA !== extraB) return extraB - extraA;
+        if (extraA.peso !== extraB.peso) return extraB.peso - extraA.peso;
+
+        if (extraA.fecha && extraB.fecha) {
+            return new Date(extraB.fecha) - new Date(extraA.fecha);
+        }
 
         return new Date(b.fecha_creado) - new Date(a.fecha_creado);
     });
