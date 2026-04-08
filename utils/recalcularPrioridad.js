@@ -1,3 +1,5 @@
+const supabase = require("../config/supabase");
+
 async function recalcularPrioridad(ref_id, tipo) {
     const tabla = tipo === "anuncio" ? "anuncios" : "habitaciones";
 
