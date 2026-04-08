@@ -202,7 +202,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                     fecha_inicio: ahoraISO,
                     fecha_expira: new Date(ahora.getTime() + 86400000).toISOString(),
                     ultima_subida: ahoraISO,
-                    stripe_session_id: session.id
+                    stripe_session_id: session.id,
+                    activa: true
                 });
 
                 console.log("⬆ Subiendo anuncio arriba");
@@ -227,7 +228,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                     fecha_expira: new Date(ahora.getTime() + 7 * 86400000).toISOString(),
                     ultima_subida: ahoraISO,
                     intervalo_horas: 2,
-                    stripe_session_id: session.id
+                    stripe_session_id: session.id,
+                    activa: true
                 });
 
                 continue;
@@ -243,7 +245,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                     cantidad: extra.cantidad || 1,
                     fecha_inicio: ahoraISO,
                     fecha_expira: new Date(ahora.getTime() + 3 * 86400000).toISOString(),
-                    stripe_session_id: session.id
+                    stripe_session_id: session.id,
+                    activa: true
                 });
 
                 continue;
