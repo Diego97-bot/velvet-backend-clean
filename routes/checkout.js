@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
         const extraPrecios = {
             subida_24h: 4.99,
             verificado: 14.99,
-            auto_subida_6h: 6.99,       // ← NUEVO
+            auto_subida_2h: 9.99,       // ← NUEVO
             boost_3dias: 2.99,
             anuncios_extra: 4.99
         };
@@ -50,7 +50,7 @@ router.post("/", async (req, res) => {
         const extraNombresFront = {
             subida_24h: "Primera posición",
             verificado: "Anuncio verificado",
-            auto_subida_6h: "Auto‑subida cada 6h",   // ← NUEVO
+            auto_subida_2h: "Auto‑subida cada 2h",   // ← NUEVO
             boost_3dias: "Boost 3 días",
             anuncios_extra: "Anuncio Extra"
         };

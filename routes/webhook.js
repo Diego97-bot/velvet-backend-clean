@@ -214,8 +214,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
                 continue;
 
-            case "auto_subida_6h":
-                console.log("🔁 Activando auto_subida_6h");
+            case "auto_subida_2h":
+                console.log("🔁 Activando auto_subida_2h");
 
                 mejorasAInsertar.push({
                     tipo,
@@ -226,7 +226,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                     fecha_inicio: ahoraISO,
                     fecha_expira: new Date(ahora.getTime() + 7 * 86400000).toISOString(),
                     ultima_subida: ahoraISO,
-                    intervalo_horas: 6,
+                    intervalo_horas: 2,
                     stripe_session_id: session.id
                 });
 

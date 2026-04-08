@@ -44,9 +44,9 @@ const extras = [
     },
     {
         id: 3,
-        nombre: "Auto-subida cada 6h",
-        descripcion: "Subida automática cada 6 horas",
-        precio: 6.99,
+        nombre: "Auto-subida cada 2h",
+        descripcion: "Subida automática cada 2 horas",
+        precio: 9.99,
         metadata: { tipo: "extra", extra_id: 3 }
     },
     {
