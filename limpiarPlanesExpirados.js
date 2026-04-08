@@ -1,5 +1,5 @@
 const supabase = require("./config/supabase");
-const { recalcularPrioridad } = require("../utils/recalcularPrioridad.js");
+const { recalcularPrioridad } = require("./utils/recalcularPrioridad.js");
 
 async function limpiarPlanesExpirados() {
     console.log("⏳ Revisando planes y extras expirados...");
