@@ -1,4 +1,5 @@
 const supabase = require("./config/supabase");
+import { recalcularPrioridad } from "../utils/recalcularPrioridad.js";
 
 async function limpiarPlanesExpirados() {
     console.log("⏳ Revisando planes y extras expirados...");
@@ -23,6 +24,8 @@ async function limpiarPlanesExpirados() {
             .eq("id", anuncio.id);
 
         console.log(`🔄 Anuncio ${anuncio.id} → FREE (plan expirado)`);
+        await recalcularPrioridad(anuncio.id, "anuncio");
+
     }
 
     // ============================================================
@@ -43,6 +46,9 @@ async function limpiarPlanesExpirados() {
             .eq("id", hab.id);
 
         console.log(`🔄 Habitación ${hab.id} → FREE (plan expirado)`);
+       await recalcularPrioridad(hab.id, "habitacion");
+
+
     }
 
     // ============================================================
@@ -59,6 +65,9 @@ async function limpiarPlanesExpirados() {
             .eq("id", extra.id);
 
         console.log(`🧹 Extra ${extra.id} desactivado (ref_id: ${extra.ref_id})`);
+        await recalcularPrioridad(extra.ref_id, "anuncio"); // o "habitacion"
+
+        
     }
 
 

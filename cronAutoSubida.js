@@ -1,5 +1,6 @@
 const cron = require("node-cron");
 const supabase = require("./config/supabase");
+import { recalcularPrioridad } from "../utils/recalcularPrioridad.js";
 
 async function ejecutarAutoSubidas() {
     console.log("⏳ Ejecutando cron de auto-subidas...");
@@ -18,9 +19,9 @@ async function ejecutarAutoSubidas() {
 
     const ahora = Date.now();
 
-    for (const m of mejoras) {
+    for (const m of mejoras || []) {
         const fechaInicio = new Date(m.fecha_inicio).getTime();
-        const fechaFin = new Date(m.fecha_fin).getTime();
+        const fechaFin = new Date(m.fecha_expira).getTime(); // ← CORREGIDO
 
         // Si la mejora expiró → desactivarla
         if (ahora > fechaFin) {
@@ -30,6 +31,10 @@ async function ejecutarAutoSubidas() {
                 .eq("id", m.id);
 
             console.log(`⚠ Mejora ${m.id} expirada y desactivada`);
+
+            // 🔥 Recalcular prioridad porque perdió una mejora
+            await recalcularPrioridad(m.ref_id, m.tipo);
+
             continue;
         }
 
@@ -68,9 +73,13 @@ async function ejecutarAutoSubidas() {
             }
 
             console.log(`✨ Auto-subida aplicada a ${m.tipo} ${m.ref_id}`);
+
+            // 🔥 Recalcular prioridad después de la autosubida
+            await recalcularPrioridad(m.ref_id, m.tipo);
         }
     }
 }
+
 
 // Ejecutar cada 5 minutos
 cron.schedule("*/5 * * * *", ejecutarAutoSubidas);

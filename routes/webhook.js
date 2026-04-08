@@ -4,6 +4,8 @@ const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = require("../config/supabase");
 const { enviarEmail } = require("../utils/email");
+import { recalcularPrioridad } from "../utils/recalcularPrioridad.js";
+
 
 router.post("/", express.raw({ type: "application/json" }), async (req, res) => {
     console.log("\n==============================");
@@ -162,6 +164,8 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
                 insignias: planInfo.insignias || null
             })
             .eq("id", ref_id);
+        // 🔥 Recalcular prioridad por cambio de plan
+        await recalcularPrioridad(ref_id, tipo);
     }
 
     // ============================================================
@@ -279,6 +283,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     if (mejorasAInsertar.length) {
         console.log("💾 Insertando mejoras:", mejorasAInsertar);
         await supabase.from("mejoras").insert(mejorasAInsertar);
+        await recalcularPrioridad(ref_id, tipo);
     } else {
         console.log("⚠️ No hay mejoras para insertar");
     }
