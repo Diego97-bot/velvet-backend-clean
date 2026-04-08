@@ -4,7 +4,7 @@ const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = require("../config/supabase");
 const { enviarEmail } = require("../utils/email");
-import { recalcularPrioridad } from "../utils/recalcularPrioridad.js";
+const { recalcularPrioridad } = require("../utils/recalcularPrioridad.js");
 
 
 router.post("/", express.raw({ type: "application/json" }), async (req, res) => {

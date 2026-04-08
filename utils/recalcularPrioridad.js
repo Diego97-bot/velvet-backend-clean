@@ -80,3 +80,4 @@ async function recalcularPrioridad(ref_id, tipo) {
         })
         .eq("id", ref_id);
 }
+module.exports = { recalcularPrioridad };

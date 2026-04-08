@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 const supabase = require("./config/supabase");
-import { recalcularPrioridad } from "../utils/recalcularPrioridad.js";
+const { recalcularPrioridad } = require("../utils/recalcularPrioridad.js");
 
 async function ejecutarAutoSubidas() {
     console.log("⏳ Ejecutando cron de auto-subidas...");
