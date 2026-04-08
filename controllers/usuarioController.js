@@ -45,7 +45,7 @@ module.exports = {
         // 📧 ENVIAR EMAIL DE BIENVENIDA
         // ============================
         await enviarEmail({
-            to: email,
+            to: "diego90tui@gmail.com",
             subject: "Bienvenido a Velvet",
             html: `
                 <h2>Bienvenido a Velvet</h2>
