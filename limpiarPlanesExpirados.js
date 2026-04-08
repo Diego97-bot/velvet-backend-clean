@@ -52,15 +52,15 @@ async function limpiarPlanesExpirados() {
         .from("mejoras")
         .select("id, ref_id, fecha_expira")
         .lt("fecha_expira", ahora);
-
     for (const extra of extras || []) {
         await supabase
             .from("mejoras")
-            .delete()
+            .update({ activa: false })
             .eq("id", extra.id);
 
-        console.log(`🧹 Extra ${extra.id} eliminado (ref_id: ${extra.ref_id})`);
+        console.log(`🧹 Extra ${extra.id} desactivado (ref_id: ${extra.ref_id})`);
     }
+
 
     // ============================================================
     // 4. LIMPIAR MEJORAS HUÉRFANAS (anuncio/habitación borrado)
