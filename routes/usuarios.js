@@ -7,6 +7,12 @@ const auth = require("../middleware/auth");
 router.post("/register", usuarioController.register);
 router.post("/login", usuarioController.login);
 
+// Recuperación de contraseña
+router.post("/recuperar", usuarioController.recuperarPassword);
+router.get("/reset/:token", usuarioController.validarTokenReset);
+router.post("/reset/:token", usuarioController.resetPassword);
+
+
 // Perfil
 router.get("/mi-perfil", auth, usuarioController.getPerfil);
 router.put("/mi-perfil", auth, usuarioController.updatePerfil);

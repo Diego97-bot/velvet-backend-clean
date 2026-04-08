@@ -141,6 +141,134 @@ module.exports = {
         }
     },
 
+
+// ===============================
+//  SOLICITAR RECUPERACIÓN
+// ===============================
+recuperarPassword: async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: "Email requerido" });
+    }
+
+    try {
+        const { data: usuario } = await supabase
+            .from("usuarios")
+            .select("id, email")
+            .eq("email", email)
+            .maybeSingle();
+
+        // No revelamos si existe o no
+        if (!usuario) {
+            return res.json({ message: "Si el email existe, se enviará un enlace" });
+        }
+
+        const token = crypto.randomBytes(32).toString("hex");
+        const expira = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h
+
+        await supabase
+            .from("usuarios")
+            .update({
+                reset_token: token,
+                reset_expira: expira
+            })
+            .eq("id", usuario.id);
+
+        const enlace = `http://localhost:3000/auth/reset/${token}`;
+
+        await enviarEmail({
+            to: email,
+            subject: "Recupera tu contraseña",
+            html: `
+                <h2>Recuperación de contraseña</h2>
+                <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+                <p><a href="${enlace}">${enlace}</a></p>
+                <p>Este enlace expira en 1 hora.</p>
+            `
+        });
+
+        return res.json({ message: "Si el email existe, se enviará un enlace" });
+
+    } catch (err) {
+        console.error("❌ Error en recuperarPassword:", err);
+        return res.status(500).json({ error: "Error interno del servidor" });
+    }
+},
+
+// ===============================
+//  VALIDAR TOKEN
+// ===============================
+validarTokenReset: async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        const { data: usuario } = await supabase
+            .from("usuarios")
+            .select("id, reset_expira")
+            .eq("reset_token", token)
+            .maybeSingle();
+
+        if (!usuario) {
+            return res.status(400).json({ error: "Token inválido" });
+        }
+
+        if (new Date(usuario.reset_expira) < new Date()) {
+            return res.status(400).json({ error: "Token expirado" });
+        }
+
+        return res.json({ ok: true });
+
+    } catch (err) {
+        console.error("❌ Error en validarTokenReset:", err);
+        return res.status(500).json({ error: "Error interno del servidor" });
+    }
+},
+// ===============================
+//  RESTABLECER CONTRASEÑA
+// ===============================
+resetPassword: async (req, res) => {
+    const { token } = req.params;
+    const { password_nueva } = req.body;
+
+    if (!password_nueva) {
+        return res.status(400).json({ error: "Contraseña requerida" });
+    }
+
+    try {
+        const { data: usuario } = await supabase
+            .from("usuarios")
+            .select("*")
+            .eq("reset_token", token)
+            .maybeSingle();
+
+        if (!usuario) {
+            return res.status(400).json({ error: "Token inválido" });
+        }
+
+        if (new Date(usuario.reset_expira) < new Date()) {
+            return res.status(400).json({ error: "Token expirado" });
+        }
+
+        const hash = await bcrypt.hash(password_nueva, 10);
+
+        await supabase
+            .from("usuarios")
+            .update({
+                password: hash,
+                reset_token: null,
+                reset_expira: null
+            })
+            .eq("id", usuario.id);
+
+        return res.json({ message: "Contraseña actualizada correctamente" });
+
+    } catch (err) {
+        console.error("❌ Error en resetPassword:", err);
+        return res.status(500).json({ error: "Error interno del servidor" });
+    }
+},
+
     // ===============================
     //  OBTENER PERFIL
     // ===============================
