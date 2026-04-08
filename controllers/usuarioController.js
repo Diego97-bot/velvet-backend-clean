@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config/auth");
 const db = require("../config/supabase"); // <-- IMPORTANTE para contar publicaciones
+const { enviarEmail } = require("../utils/email");
 
 module.exports = {
 
@@ -11,47 +12,69 @@ module.exports = {
     //  REGISTRO
     // ===============================
     register: async (req, res) => {
-        const { nombre, email, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-        if (!nombre || !email || !password) {
-            return res.status(400).json({ error: "Faltan campos obligatorios" });
+    if (!nombre || !email || !password) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    try {
+        const { data: existe } = await supabase
+            .from("usuarios")
+            .select("*")
+            .eq("email", email)
+            .maybeSingle();
+
+        if (existe) {
+            return res.status(409).json({ error: "El email ya está registrado" });
         }
 
-        try {
-            const { data: existe } = await supabase
-                .from("usuarios")
-                .select("*")
-                .eq("email", email)
-                .maybeSingle();
+        const hash = await bcrypt.hash(password, 10);
 
-            if (existe) {
-                return res.status(409).json({ error: "El email ya está registrado" });
+        const { data, error } = await supabase
+            .from("usuarios")
+            .insert([{ nombre, email, password: hash }])
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({ error: "Error al registrar usuario" });
+        }
+
+        // ============================
+        // 📧 ENVIAR EMAIL DE BIENVENIDA
+        // ============================
+        await enviarEmail({
+            to: email,
+            subject: "Bienvenido a Velvet",
+            html: `
+                <h2>Bienvenido a Velvet</h2>
+                <p>Hola ${nombre || ""},</p>
+                <p>Tu cuenta ha sido creada correctamente.</p>
+                <p>Ya puedes iniciar sesión y empezar a publicar anuncios.</p>
+                <br>
+                <p>Gracias por unirte a Velvet.</p>
+            `
+        });
+
+        // ============================
+        // RESPUESTA FINAL
+        // ============================
+        return res.json({
+            message: "Usuario registrado correctamente",
+            user: {
+                id: data.id,
+                nombre: data.nombre,
+                email: data.email
             }
+        });
 
-            const hash = await bcrypt.hash(password, 10);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Error interno del servidor" });
+    }
+},
 
-            const { data, error } = await supabase
-                .from("usuarios")
-                .insert([{ nombre, email, password: hash }])
-                .select()
-                .single();
-
-            if (error) return res.status(500).json({ error: "Error al registrar usuario" });
-
-            return res.json({
-                message: "Usuario registrado correctamente",
-                user: {
-                    id: data.id,
-                    nombre: data.nombre,
-                    email: data.email
-                }
-            });
-
-        } catch (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Error interno del servidor" });
-        }
-    },
 
     // ===============================
     //  LOGIN

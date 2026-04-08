@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 async function enviarEmail({ to, subject, html }) {
     try {
         const { data, error } = await resend.emails.send({
-            from: "TuWeb <no-reply@tuweb.com>",
+            from: "Velvet <no-reply@velvet.com>",
             to,
             subject,
             html
@@ -25,3 +25,4 @@ async function enviarEmail({ to, subject, html }) {
 }
 
 module.exports = { enviarEmail };
+
