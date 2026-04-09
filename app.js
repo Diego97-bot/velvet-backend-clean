@@ -33,7 +33,7 @@ const cron = require("node-cron");
 const limpiarPlanesExpirados = require("./limpiarPlanesExpirados");
 const limpiarArchivosHuérfanos = require("./limpiarArchivos");
 require("./cronAutoSubida");
-require("./cronExpirados");
+require("./cronNotificarExpirados");
 
 // ===============================
 //  ENDPOINTS
