@@ -90,30 +90,37 @@ async function notificarExpirados() {
 
         const nombre = micropago?.nombre || "mejora";
         const emailUsuario = "diego90tui@gmail.com"; // temporal
+
+        // ⛔ Mejoras que NO deben enviar email
+        const mejorasSinAviso = ["subida_24h", "verificado", "anuncio_extra"];
+        if (mejorasSinAviso.includes(nombre)) {
+            console.log(`⏭ Saltando mejora sin aviso: ${nombre}`);
+            continue;
+        }
+
         let mensaje = "";
 
         // -----------------------------------------
-        // MENSAJES SEGÚN EL CATÁLOGO REAL
+        // MENSAJES SOLO PARA LAS QUE SÍ QUIERES
         // -----------------------------------------
         if (nombre === "boost_3dias") {
             mensaje = `
-                <p>Hola,</p>
-                <p>El boost de tu publicación está a punto de expirar. Seguirá visible, pero ya no estará destacada.</p>
-                <p>Puedes renovarlo desde tu panel.</p>
-                <p>Gracias por usar Velvet.</p>
-            `;
+            <p>Hola,</p>
+            <p>El boost de tu publicación está a punto de expirar. Seguirá visible, pero ya no estará destacada.</p>
+            <p>Puedes renovarlo desde tu panel.</p>
+            <p>Gracias por usar Velvet.</p>
+        `;
         }
 
         else if (nombre === "auto_subida_2h") {
             mensaje = `
-                <p>Hola,</p>
-                <p>Las auto-subidas de tu publicación están a punto de expirar. Dejará de subir automáticamente a primeras posiciones.</p>
-                <p>Puedes renovarlas desde tu panel.</p>
-                <p>Gracias por usar Velvet.</p>
-            `;
+            <p>Hola,</p>
+            <p>Las auto-subidas de tu publicación están a punto de expirar. Dejará de subir automáticamente a primeras posiciones.</p>
+            <p>Puedes renovarlas desde tu panel.</p>
+            <p>Gracias por usar Velvet.</p>
+        `;
         }
 
-   
         await enviarEmail({
             to: emailUsuario,
             subject: "Una mejora está por expirar",
@@ -122,6 +129,7 @@ async function notificarExpirados() {
 
         console.log(`📨 Aviso enviado → mejora ${nombre} ref_id ${mejora.ref_id}`);
     }
+
 
     console.log("✨ Notificaciones completadas");
 }
