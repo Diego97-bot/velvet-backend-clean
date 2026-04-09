@@ -164,6 +164,7 @@ recuperarPassword: async (req, res) => {
             return res.json({ message: "Si el email existe, se enviará un enlace" });
         }
 
+        // 🔥 TOKEN CORRECTO
         const token = crypto.randomBytes(32).toString("hex");
         const expira = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h
 
@@ -175,6 +176,7 @@ recuperarPassword: async (req, res) => {
             })
             .eq("id", usuario.id);
 
+        // 🔥 Enlace correcto (usa tu frontend)
         const enlace = `https://velvet-backend-clean-production.up.railway.app/auth/reset/${token}`;
 
         await enviarEmail({
@@ -195,6 +197,7 @@ recuperarPassword: async (req, res) => {
         return res.status(500).json({ error: "Error interno del servidor" });
     }
 },
+
 
 // ===============================
 //  VALIDAR TOKEN
