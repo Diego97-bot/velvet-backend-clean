@@ -178,7 +178,8 @@ recuperarPassword: async (req, res) => {
             .eq("id", usuario.id);
 
         // 🔥 Enlace correcto (usa tu frontend)
-        const enlace = `https://velvet-backend-clean-production.up.railway.app/auth/reset/${token}`;
+        const enlace = `https://velvet-frontend-taupe.vercel.app/reset.html?token=${token}`;
+
 
         await enviarEmail({
             to: email,
