@@ -1,0 +1,18 @@
+const cron = require("node-cron");
+const { notificarExpirados } = require("./utils/notificarExpirados");
+
+async function ejecutarNotificaciones() {
+    console.log("⏳ Ejecutando cron de notificación de expiraciones...");
+
+    try {
+        await notificarExpirados();
+        console.log("✨ Cron notificarExpirados completado");
+    } catch (err) {
+        console.error("❌ Error en cron notificarExpirados:", err);
+    }
+}
+
+// Ejecutar cada 1 hora
+cron.schedule("0 * * * *", ejecutarNotificaciones);
+
+console.log("🚀 Cron de notificarExpirados iniciado");

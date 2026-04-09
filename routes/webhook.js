@@ -5,6 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = require("../config/supabase");
 const { enviarEmail } = require("../utils/email");
 const { recalcularPrioridad } = require("../utils/recalcularPrioridad.js");
+const { enviarEmail } = require("../utils/email");
 
 
 router.post("/", express.raw({ type: "application/json" }), async (req, res) => {
@@ -289,6 +290,17 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     }
 
     console.log("✨ FIN WEBHOOK");
+    await enviarEmail({
+        to: "diego90@gmail.com",
+        subject: "Compra confirmada",
+        html: `
+        <p>Hola,</p>
+        <p>Tu compra se ha procesado correctamente. Ya puedes disfrutar de las ventajas del plan adquirido.</p>
+        <p>Gracias por apoyar Velvet.</p>
+    `
+    });
+
+
     res.json({ received: true });
 });
 
