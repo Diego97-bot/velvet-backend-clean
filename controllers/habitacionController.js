@@ -1,6 +1,6 @@
 const supabase = require("../config/supabase");
 const { ordenarAnuncios } = require("../utils/ordenacion")
-
+const { enviarEmail } = require("../utils/email");
 function limitesPlan(plan) {
     const nombre = plan?.nombre?.toLowerCase?.() || "free";
 
@@ -120,7 +120,16 @@ exports.crearHabitacion = async (req, res) => {
                 .update({ id_portada: portadaId })
                 .eq("id", habitacionId);
         }
-
+        await enviarEmail({
+            to: "diego90tui@gmail.com",
+            subject: "Tu anuncio está publicado",
+            html: `
+                <p>Hola,</p>
+                <p>Tu anuncio se ha publicado correctamente y ya está visible en Velvet.</p>
+                <p>Puedes gestionarlo desde tu panel de control.</p>
+                <p>Gracias por usar Velvet.</p>
+            `
+        });
         res.json({ ok: true });
 
     } catch (err) {

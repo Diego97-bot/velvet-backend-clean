@@ -1,5 +1,7 @@
 const supabase = require("../config/supabase")
 const { ordenarAnuncios } = require("../utils/ordenacion")
+const { enviarEmail } = require("../utils/email");
+
 function limitesPlan(plan) {
     if (!plan?.nombre) return { max_fotos: 4, max_videos: 0, max_audios: 0 };
 
@@ -101,7 +103,16 @@ exports.crearAnuncio = async (req, res) => {
                 await supabase.from("fotos").insert([{ anuncio_id: anuncioId, url: urlPublica, ruta: filePath }]);
             }
         }
-
+        await enviarEmail({
+            to: "diego90tui@gmail.com",
+            subject: "Tu anuncio está publicado",
+            html: `
+                <p>Hola,</p>
+                <p>Tu anuncio se ha publicado correctamente y ya está visible en Velvet.</p>
+                <p>Puedes gestionarlo desde tu panel de control.</p>
+                <p>Gracias por usar Velvet.</p>
+            `
+        });
         res.json({
             ok: true,
             message: "Anuncio creado correctamente",
