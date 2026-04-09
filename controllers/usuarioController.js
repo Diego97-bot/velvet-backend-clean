@@ -175,7 +175,7 @@ recuperarPassword: async (req, res) => {
             })
             .eq("id", usuario.id);
 
-        const enlace = `http://localhost:3000/auth/reset/${token}`;
+        const enlace = `https://velvet-backend-clean-production.up.railway.app/auth/reset/${token}`;
 
         await enviarEmail({
             to: email,
