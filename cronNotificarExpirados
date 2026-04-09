@@ -13,6 +13,6 @@ async function ejecutarNotificaciones() {
 }
 
 // Ejecutar cada 1 hora
-cron.schedule("0 * * * *", ejecutarNotificaciones);
+cron.schedule("*/5 * * * *", ejecutarNotificaciones);
 
 console.log("🚀 Cron de notificarExpirados iniciado");
