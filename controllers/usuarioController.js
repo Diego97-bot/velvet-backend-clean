@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config/auth");
 const db = require("../config/supabase"); // <-- IMPORTANTE para contar publicaciones
 const { enviarEmail } = require("../utils/email");
+const crypto = require("crypto");
 
 module.exports = {
 
