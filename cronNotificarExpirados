@@ -1,3 +1,4 @@
+console.log("🔥 cronExpirados.js CARGADO");
 const cron = require("node-cron");
 const { notificarExpirados } = require("./utils/notificarExpirados");
 

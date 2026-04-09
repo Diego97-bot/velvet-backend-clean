@@ -290,7 +290,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
     console.log("✨ FIN WEBHOOK");
     await enviarEmail({
-        to: "diego90@gmail.com",
+        to: "diego90tui@gmail.com",
         subject: "Compra confirmada",
         html: `
         <p>Hola,</p>
