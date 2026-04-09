@@ -19,7 +19,7 @@ async function notificarExpirados() {
     if (errorAnuncios) console.error("❌ Error anuncios:", errorAnuncios);
 
     for (const anuncio of anuncios || []) {
-        const emailUsuario = "test@email.com"; // temporal
+        const emailUsuario = "diego90tui@gmail.com"; // temporal
 
         await enviarEmail({
             to: emailUsuario,
