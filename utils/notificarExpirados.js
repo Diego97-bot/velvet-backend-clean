@@ -115,20 +115,26 @@ async function notificarExpirados() {
 
         if (nombre === "boost_3dias") {
             mensaje = `
-                <p>Hola,</p>
-                <p>El boost de tu publicación está a punto de expirar. Seguirá visible, pero ya no estará destacada.</p>
-                <p>Puedes renovarlo desde tu panel.</p>
-                <p>Gracias por usar Velvet.</p>
-            `;
+            <p>Hola,</p>
+            <p>El boost de tu publicación está a punto de expirar. Seguirá visible, pero ya no estará destacada.</p>
+            <p>Puedes renovarlo desde tu panel.</p>
+            <p>Gracias por usar Velvet.</p>
+        `;
         }
 
         else if (nombre === "auto_subida_2h") {
             mensaje = `
-                <p>Hola,</p>
-                <p>Las auto-subidas de tu publicación están a punto de expirar. Dejará de subir automáticamente a primeras posiciones.</p>
-                <p>Puedes renovarlas desde tu panel.</p>
-                <p>Gracias por usar Velvet.</p>
-            `;
+            <p>Hola,</p>
+            <p>Las auto-subidas de tu publicación están a punto de expirar. Dejará de subir automáticamente a primeras posiciones.</p>
+            <p>Puedes renovarlas desde tu panel.</p>
+            <p>Gracias por usar Velvet.</p>
+        `;
+        }
+
+        // Si por alguna razón no hay mensaje, no enviamos nada
+        if (!mensaje.trim()) {
+            console.log(`⚠ Mejora ${nombre} sin mensaje definido, saltando...`);
+            continue;
         }
 
         await enviarEmail({
@@ -145,6 +151,7 @@ async function notificarExpirados() {
 
         console.log(`📨 Aviso enviado → mejora ${nombre} ref_id ${mejora.ref_id}`);
     }
+
 
     console.log("✨ Notificaciones completadas");
 }
