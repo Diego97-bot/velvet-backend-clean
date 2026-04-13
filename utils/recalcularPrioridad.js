@@ -32,7 +32,7 @@ async function recalcularPrioridad(ref_id, tipo) {
         .eq("activa", true);
 
     let tiene24h = mejoras.some(m => m.mejora_id === 101);
-    let tieneBoost = mejoras.some(m => m.mejora_id === 102);
+    let tieneBoost = mejoras.some(m => m.mejora_id === 104);
     let tieneAutosubida = mejoras.some(m => m.mejora_id === 103);
 
     // 4. PRIORIDAD MEJORAS
